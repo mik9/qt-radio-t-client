@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network xml
 
 TARGET = Radio-T-qt
 TEMPLATE = app
@@ -19,5 +19,6 @@ HEADERS  += chatwidget.h \
 
 FORMS    += chatwidget.ui
 
-debug:LIBS += -lqxmpp_d0
-#release:LIBS += -lqxmpp0
+windows: LIBS += -lqxmpp0
+unix: CONFIG += link_pkgconfig
+unix: PKGCONFIG += qxmpp
