@@ -136,8 +136,6 @@ void ChatWidget::message_received(QXmppMessage m) {
     this->ui->chat_edit->moveCursor(QTextCursor::End);
     this->ui->chat_edit->insertHtml(this->MESSAGE_FORMAT.arg(nick, username_to_color(original_nick).name(), message, stamp_str, original_nick));
     if (this->ui->chat_edit->verticalScrollBar()->value() != this->ui->chat_edit->verticalScrollBar()->maximum()) {
-        this->m_chat_anim->stop();
-        this->m_chat_anim->setStartValue(this->ui->chat_edit->verticalScrollBar()->value());
         this->m_chat_anim->setEndValue(this->ui->chat_edit->verticalScrollBar()->maximum());
         this->m_chat_anim->setDuration(400);
         this->m_chat_anim->setEasingCurve(QEasingCurve::OutQuad);
