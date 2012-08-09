@@ -8,7 +8,7 @@ QRegExp ChatWidget::EMAIL_REG_EXP("\\S+@(\\S+\\.\\S+)");
 QColor ChatWidget::username_to_color(QString u) {
     quint8 sum = 0;
     foreach(QChar c, u) {
-        sum += c.digitValue()*50;
+        sum += c.toAscii();
     }
     return QColor::fromHsv(sum, 255, 180);
 }
