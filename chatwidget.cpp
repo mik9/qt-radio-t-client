@@ -213,7 +213,10 @@ void ChatWidget::put_username(QString username) {
     if (!this->ui->message_edit->text().endsWith(" ")) {
         username = " " + username;
     }
-    this->ui->message_edit->setText(this->ui->message_edit->text() + username + " ");
+    if (!username.endsWith(" ")) {
+        username += " ";
+    }
+    this->ui->message_edit->setText(this->ui->message_edit->text() + username);
 }
 
 void ChatWidget::xmpp_connected() {
