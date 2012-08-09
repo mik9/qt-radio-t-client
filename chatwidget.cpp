@@ -146,10 +146,27 @@ void ChatWidget::message_received(QXmppMessage m) {
 void ChatWidget::on_chat_edit_anchorClicked(QUrl uri) {
     if (uri.scheme() == "user") {
         QString username = uri.host();
+        QString real_username;
         if(!uri.userName().isEmpty()) {
             username = uri.userName() + "@" + username;
+            real_username = username;
         }
-        this->put_username(username);
+        QStringList l = manager.rooms().at(0)->participants().filter(username, Qt::CaseInsensitive);
+        if (real_username.isEmpty()) {
+            if (l.isEmpty()) {
+                real_username = username;
+            } else {
+                real_username = l.first();
+            }
+        }
+        if (l.length() > 1) {
+            foreach (QString s, l) {
+                if (s.length() == username.length()) {
+                    real_username = s;
+                }
+            }
+        }
+        this->put_username(strip_username(real_username));
     } else {
         QDesktopServices::openUrl(uri);
     }
@@ -230,12 +247,13 @@ void ChatWidget::on_user_list_doubleClicked(const QModelIndex &index)
 }
 
 void ChatWidget::put_username(QString username) {
-    if (this->ui->message_edit->text().isEmpty()) {
+    if (this->ui->message_edit->text().isEmpty()
+            || this->ui->message_edit->text().endsWith(":")
+            || this->ui->message_edit->text().endsWith(": ")) {
         username += ": ";
-    } else {
-        if (!this->ui->message_edit->text().endsWith(" ")) {
-            username = " " + username;
-        }
+    }
+    if (!this->ui->message_edit->text().isEmpty() && !this->ui->message_edit->text().endsWith(" ")) {
+        username = " " + username;
     }
     if (!username.endsWith(" ")) {
         username += " ";
@@ -257,6 +275,7 @@ void ChatWidget::room_joined() {
     this->ui->connecting_frame->hide();
     this->ui->message_frame->show();
     this->ui->chat_edit->verticalScrollBar()->setValue(this->ui->chat_edit->verticalScrollBar()->value()+this->ui->message_frame->height());
+    this->ui->logout_button->setEnabled(true);
     update_user_list(manager.rooms().at(0)->participants());
 }
 
@@ -292,6 +311,8 @@ void ChatWidget::user_left_room() {
 
 void ChatWidget::on_logout_button_clicked()
 {
+    this->ui->logout_button->setEnabled(false);
+    QApplication::processEvents();
     this->manager.rooms().at(0)->leave();
 }
 
