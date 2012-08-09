@@ -35,13 +35,14 @@ ChatWidget::ChatWidget(QWidget *parent) :
     SimpleCrypt s(CRYPT_KEY);
     this->m_password = s.decryptToString(settings.value("password", "").toString());
     this->m_server = settings.value("server", "").toString();
-    this->ui->nick_edit->setText(settings.value("nick", "").toString());
+    this->m_nick = settings.value("nick", "").toString();
     if (this->m_server.isEmpty() && !this->m_username.isEmpty()) {
         this->m_server = this->parseServer(this->m_username);
     }
     this->ui->login_edit->setText(this->m_username);
     this->ui->password_edit->setText(this->m_password);
     this->ui->server_edit->setText(this->m_server);
+    this->ui->nick_edit->setText(this->m_nick);
     this->ui->message_frame->hide();
     this->ui->connecting_frame->hide();
     this->ui->nick_frame->hide();
@@ -84,20 +85,21 @@ ChatWidget::~ChatWidget()
     SimpleCrypt s(CRYPT_KEY);
     settings.setValue("password", s.encryptToString(this->m_password));
     settings.setValue("server", this->m_server);
-    settings.setValue("nick", this->ui->nick_edit->text());
+    settings.setValue("nick", this->m_nick);
     xmpp_client.disconnectFromServer();
     delete ui;
 }
 
 void ChatWidget::message_received(QXmppMessage m) {
     QString nick = strip_username(m.from());
+    QString original_nick = nick;
     QString message = m.body();
     QDateTime stamp = m.stamp();
     QString stamp_str = "";
 
     bool should_scroll_down = (this->ui->chat_edit->verticalScrollBar()->maximum()
                                - this->ui->chat_edit->verticalScrollBar()->value()) < 10;
-    if (!this->m_username.isEmpty() && message.contains(this->m_username)) {
+    if (!this->m_nick.isEmpty() && message.contains(this->m_nick)) {
         if (this->isActiveWindow()) {
             emit this->notify();
         }
@@ -237,7 +239,8 @@ void ChatWidget::on_join_button_clicked()
     this->ui->connecting_frame->show();
     this->ui->status_label->setText("Joining room...");
     QXmppMucRoom *room = manager.addRoom("online@conference.radio-t.com");
-    room->setNickName(this->ui->nick_edit->text());
+    this->m_nick = this->ui->nick_edit->text();
+    room->setNickName(this->m_nick);
     connect(room, SIGNAL(messageReceived(QXmppMessage)), this, SLOT(message_received(QXmppMessage)), Qt::UniqueConnection);
     connect(room, SIGNAL(joined()), this, SLOT(room_joined()), Qt::UniqueConnection);
     connect(room, SIGNAL(participantAdded(QString)), this, SLOT(user_in(QString)), Qt::UniqueConnection);
