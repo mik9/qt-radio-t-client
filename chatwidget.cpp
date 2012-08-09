@@ -214,21 +214,22 @@ void ChatWidget::xmpp_connected() {
 void ChatWidget::room_joined() {
     this->ui->connecting_frame->hide();
     this->ui->message_frame->show();
+    this->ui->chat_edit->verticalScrollBar()->setValue(this->ui->chat_edit->verticalScrollBar()->value()+this->ui->message_frame->height());
     update_user_list(manager.rooms().at(0)->participants());
 }
 
 void ChatWidget::on_join_button_clicked()
 {
     this->ui->nick_frame->hide();
-    this->ui->status_label->show();
+    this->ui->connecting_frame->show();
     this->ui->status_label->setText("Joining room...");
     QXmppMucRoom *room = manager.addRoom("online@conference.radio-t.com");
     room->setNickName(this->ui->nick_edit->text());
-    connect(room, SIGNAL(messageReceived(QXmppMessage)), this, SLOT(message_received(QXmppMessage)));
-    connect(room, SIGNAL(joined()), this, SLOT(room_joined()));
-    connect(room, SIGNAL(participantAdded(QString)), this, SLOT(user_in(QString)));
-    connect(room, SIGNAL(participantRemoved(QString)), this, SLOT(user_out(QString)));
-    connect(room, SIGNAL(kicked(QString,QString)), this, SLOT(user_left_room()));
+    connect(room, SIGNAL(messageReceived(QXmppMessage)), this, SLOT(message_received(QXmppMessage)), Qt::UniqueConnection);
+    connect(room, SIGNAL(joined()), this, SLOT(room_joined()), Qt::UniqueConnection);
+    connect(room, SIGNAL(participantAdded(QString)), this, SLOT(user_in(QString)), Qt::UniqueConnection);
+    connect(room, SIGNAL(participantRemoved(QString)), this, SLOT(user_out(QString)), Qt::UniqueConnection);
+    connect(room, SIGNAL(kicked(QString,QString)), this, SLOT(user_left_room()), Qt::UniqueConnection);
     connect(room, SIGNAL(left()), this, SLOT(user_left_room()));
     room->join();
 }
