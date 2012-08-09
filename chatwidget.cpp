@@ -2,7 +2,7 @@
 #include "ui_chatwidget.h"
 #include "key.h"
 
-QString ChatWidget::MESSAGE_FORMAT = "%4 <a href=\"user://%1/\"><font color=\"%2\">%1</font></a>: %3";
+QString ChatWidget::MESSAGE_FORMAT = "<table cellspacing=0 cellpadding=0 border=0><tr><td width=80>%4&nbsp;</td><td width=120 align=right style=\"padding-right:2\"><a href=\"user://%1/\"><font color=\"%2\">%1</font></a>:</td><td style=\"padding-left:3;background-color:#fff;\" width=100%>%3 </td></tr></table>";
 QRegExp ChatWidget::URL_REG_EXP("(\\w+://\\S+\\.\\S+)");
 QRegExp ChatWidget::EMAIL_REG_EXP("\\S+@(\\S+\\.\\S+)");
 
@@ -108,7 +108,17 @@ void ChatWidget::message_received(QXmppMessage m) {
         stamp_str = stamp.toString("hh:mm:ss");
     }
     message.replace(URL_REG_EXP, "<a href=\"\\1\">\\1</a>");
-    this->ui->chat_edit->append(this->MESSAGE_FORMAT.arg(nick, username_to_color(nick).name(), message, stamp_str));
+    int i=0, max=nick.length();
+    while (this->ui->chat_edit->fontMetrics().width(nick + ":") > 120) {
+        if(!nick.endsWith("...")) {
+            nick += "...";
+        }
+        nick.remove(nick.length()-4, 1);
+        if (++i>max)
+            break;
+        qDebug() << this->ui->chat_edit->fontMetrics().width(stamp_str + " " + nick + ":");
+    }
+    this->ui->chat_edit->insertHtml(this->MESSAGE_FORMAT.arg(nick, username_to_color(nick).name(), message, stamp_str));
     if (should_scroll_down) {
         this->ui->chat_edit->verticalScrollBar()->setValue(this->ui->chat_edit->verticalScrollBar()->maximum());
     }
