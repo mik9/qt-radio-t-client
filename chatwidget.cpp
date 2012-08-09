@@ -2,7 +2,7 @@
 #include "ui_chatwidget.h"
 #include "key.h"
 
-QString ChatWidget::MESSAGE_FORMAT = "<table cellspacing=0 cellpadding=0 border=0><tr><td width=80>%4&nbsp;</td><td width=120 align=right style=\"padding-right:2\"><a href=\"user://%1/\"><font color=\"%2\">%1</font></a>:</td><td style=\"padding-left:3;background-color:#fff;\" width=100%>%3 </td></tr></table>";
+QString ChatWidget::MESSAGE_FORMAT = "<table cellspacing=0 cellpadding=0 border=0><tr><td width=80>%4&nbsp;</td><td width=120 align=right style=\"padding-right:2\"><a href=\"user://%5/\"><font color=\"%2\">%1</font></a>:</td><td style=\"padding-left:3;background-color:#fff;\" width=100%>%3 </td></tr></table>";
 QRegExp ChatWidget::URL_REG_EXP("(\\w+://\\S+\\.\\S+)");
 QRegExp ChatWidget::EMAIL_REG_EXP("\\S+@(\\S+\\.\\S+)");
 
@@ -76,6 +76,9 @@ ChatWidget::ChatWidget(QWidget *parent) :
     xmpp_client.addExtension(&manager);
 
     connect(&xmpp_client, SIGNAL(connected()), this, SLOT(xmpp_connected()));
+    connect(&xmpp_client, SIGNAL(disconnected()), this, SLOT(xmpp_disconnected()));
+
+    this->m_chat_anim = new QPropertyAnimation(this->ui->chat_edit->verticalScrollBar(), "value");
 }
 
 ChatWidget::~ChatWidget()
@@ -87,6 +90,8 @@ ChatWidget::~ChatWidget()
     settings.setValue("server", this->m_server);
     settings.setValue("nick", this->m_nick);
     xmpp_client.disconnectFromServer();
+    m_chat_anim->stop();
+    delete m_chat_anim;
     delete ui;
 }
 
@@ -109,26 +114,43 @@ void ChatWidget::message_received(QXmppMessage m) {
     } else*/ {
         stamp_str = stamp.toString("hh:mm:ss");
     }
+    message = Qt::escape(message);
     message.replace(URL_REG_EXP, "<a href=\"\\1\">\\1</a>");
+    if (manager.rooms().at(0)->isJoined()) {
+        foreach (QString s, manager.rooms().at(0)->participants()) {
+            QString username = this->strip_username(s);
+            if (message.contains(username)) {
+                message.replace(username, tr("<a href=\"user://%1/\"><font color=\"%2\">%1</font></a>").arg(username, username_to_color(username).name()));
+            }
+        }
+    }
     int i=0, max=nick.length();
-    while (this->ui->chat_edit->fontMetrics().width(nick + ":") > 120) {
+    while (this->ui->chat_edit->fontMetrics().width(nick + ":") > 115) {
         if(!nick.endsWith("...")) {
             nick += "...";
         }
         nick.remove(nick.length()-4, 1);
         if (++i>max)
             break;
-        qDebug() << this->ui->chat_edit->fontMetrics().width(stamp_str + " " + nick + ":");
     }
-    this->ui->chat_edit->insertHtml(this->MESSAGE_FORMAT.arg(nick, username_to_color(nick).name(), message, stamp_str));
-    if (should_scroll_down) {
-        this->ui->chat_edit->verticalScrollBar()->setValue(this->ui->chat_edit->verticalScrollBar()->maximum());
+    this->ui->chat_edit->moveCursor(QTextCursor::End);
+    this->ui->chat_edit->insertHtml(this->MESSAGE_FORMAT.arg(nick, username_to_color(original_nick).name(), message, stamp_str, original_nick));
+    if (this->ui->chat_edit->verticalScrollBar()->value() != this->ui->chat_edit->verticalScrollBar()->maximum()) {
+        this->m_chat_anim->stop();
+        this->m_chat_anim->setStartValue(this->ui->chat_edit->verticalScrollBar()->value());
+        this->m_chat_anim->setEndValue(this->ui->chat_edit->verticalScrollBar()->maximum());
+        this->m_chat_anim->setDuration(400);
+        this->m_chat_anim->setEasingCurve(QEasingCurve::OutQuad);
+        this->m_chat_anim->start();
     }
 }
 
 void ChatWidget::on_chat_edit_anchorClicked(QUrl uri) {
     if (uri.scheme() == "user") {
         QString username = uri.host();
+        if(!uri.userName().isEmpty()) {
+            username = uri.userName() + "@" + username;
+        }
         this->put_username(username);
     } else {
         QDesktopServices::openUrl(uri);
@@ -140,7 +162,7 @@ void ChatWidget::on_send_button_clicked() {
     emit send_button_clicked(message);
     this->ui->message_edit->setText("");
     this->ui->message_edit->setFocus();
-    xmpp_client.sendMessage("online@conference.radio-t.com", message);
+    manager.rooms().at(0)->sendMessage(message);
 }
 
 void ChatWidget::on_login_button_clicked()
@@ -206,14 +228,16 @@ void ChatWidget::user_out(QString jid) {
 void ChatWidget::on_user_list_doubleClicked(const QModelIndex &index)
 {
     put_username(this->ui->user_list->item(index.row())->text());
+    this->ui->message_edit->setFocus();
 }
 
 void ChatWidget::put_username(QString username) {
     if (this->ui->message_edit->text().isEmpty()) {
         username += ": ";
-    }
-    if (!this->ui->message_edit->text().endsWith(" ")) {
-        username = " " + username;
+    } else {
+        if (!this->ui->message_edit->text().endsWith(" ")) {
+            username = " " + username;
+        }
     }
     if (!username.endsWith(" ")) {
         username += " ";
@@ -223,6 +247,11 @@ void ChatWidget::put_username(QString username) {
 
 void ChatWidget::xmpp_connected() {
     this->ui->connecting_frame->hide();
+    // Some jabber server still suports this status
+    // This app is just chat client so let's set invisible status
+    QXmppPresence p(QXmppPresence::Available);
+    p.setAvailableStatusType(QXmppPresence::Invisible);
+    xmpp_client.setClientPresence(p);
     this->ui->nick_frame->show();
 }
 
@@ -257,10 +286,20 @@ QString ChatWidget::strip_username(QString username) {
 
 void ChatWidget::user_left_room() {
     this->ui->message_frame->hide();
-    this->ui->nick_frame->show();
+    this->ui->connecting_frame->hide();
+    if(!this->ui->login_frame->isVisible()) {
+        this->ui->nick_frame->show();
+    }
 }
 
 void ChatWidget::on_logout_button_clicked()
 {
     this->manager.rooms().at(0)->leave();
+}
+
+void ChatWidget::xmpp_disconnected() {
+    this->ui->connecting_frame->hide();
+    this->ui->message_frame->hide();
+    this->ui->nick_frame->hide();
+    this->ui->login_frame->show();
 }

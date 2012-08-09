@@ -12,6 +12,8 @@
 #include <QFocusEvent>
 #include <QMessageBox>
 #include <QListWidgetItem>
+#include <QPropertyAnimation>
+#include <QEasingCurve>
 #include <qxmpp/QXmppClient.h>
 #include <qxmpp/QXmppLogger.h>
 #include <qxmpp/QXmppMessage.h>
@@ -47,6 +49,7 @@ private slots:
     void on_join_button_clicked();
     void user_left_room();
     void on_logout_button_clicked();
+    void xmpp_disconnected();
 
 signals:
     void send_button_clicked(QString message);
@@ -58,8 +61,10 @@ private:
     QString m_username;
     QString m_password;
     QString m_server;
+    QString m_nick;
     QXmppClient xmpp_client;
     QXmppMucManager manager;
+    QPropertyAnimation* m_chat_anim;
 
     static QString MESSAGE_FORMAT;
     static QRegExp URL_REG_EXP;
