@@ -102,9 +102,9 @@ void ChatWidget::message_received(QXmppMessage m) {
             emit this->notify();
         }
     }
-    if (stamp.daysTo(QDateTime::currentDateTime()) > 1) {
+    /*if (stamp.daysTo(QDateTime::currentDateTime()) > 1) {
         stamp_str = stamp.toString("dd/MM hh:mm:ss");
-    } else {
+    } else*/ {
         stamp_str = stamp.toString("hh:mm:ss");
     }
     message.replace(URL_REG_EXP, "<a href=\"\\1\">\\1</a>");
