@@ -19,6 +19,10 @@ HEADERS  += chatwidget.h \
 
 FORMS    += chatwidget.ui
 
-windows: LIBS += -lqxmpp0
+CONFIG(debug, debug|release) {
+    windows: LIBS += -lqxmpp_d0
+} else {
+    windows: LIBS += -lqxmpp0
+}
 unix: CONFIG += link_pkgconfig
 unix: PKGCONFIG += qxmpp
