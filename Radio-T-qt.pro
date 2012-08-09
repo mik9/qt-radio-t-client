@@ -15,7 +15,8 @@ SOURCES += main.cpp\
     simplecrypt.cpp
 
 HEADERS  += chatwidget.h \
-    simplecrypt.h
+    simplecrypt.h \
+    key.h
 
 FORMS    += chatwidget.ui
 

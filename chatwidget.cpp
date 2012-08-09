@@ -1,5 +1,6 @@
 #include "chatwidget.h"
 #include "ui_chatwidget.h"
+#include "key.h"
 
 QString ChatWidget::MESSAGE_FORMAT = "%4 <a href=\"user://%1/\"><font color=\"%2\">%1</font></a>: %3";
 QRegExp ChatWidget::URL_REG_EXP("(\\w+://\\S+\\.\\S+)");
@@ -31,7 +32,8 @@ ChatWidget::ChatWidget(QWidget *parent) :
 
     QSettings settings("mik_os", "qt/Radio-T client");
     this->m_username = settings.value("username", "").toString();
-    this->m_password = settings.value("password", "").toString();
+    SimpleCrypt s(CRYPT_KEY);
+    this->m_password = s.decryptToString(settings.value("password", "").toString());
     this->m_server = settings.value("server", "").toString();
     this->ui->nick_edit->setText(settings.value("nick", "").toString());
     if (this->m_server.isEmpty() && !this->m_username.isEmpty()) {
@@ -79,7 +81,8 @@ ChatWidget::~ChatWidget()
 {
     QSettings settings("mik_os", "qt/Radio-T client");
     settings.setValue("username", this->m_username);
-    settings.setValue("password", this->m_password);
+    SimpleCrypt s(CRYPT_KEY);
+    settings.setValue("password", s.encryptToString(this->m_password));
     settings.setValue("server", this->m_server);
     settings.setValue("nick", this->ui->nick_edit->text());
     xmpp_client.disconnectFromServer();
