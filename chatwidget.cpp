@@ -254,5 +254,10 @@ QString ChatWidget::strip_username(QString username) {
 
 void ChatWidget::user_left_room() {
     this->ui->message_frame->hide();
-    this->ui->login_frame->show();
+    this->ui->nick_frame->show();
+}
+
+void ChatWidget::on_logout_button_clicked()
+{
+    this->manager.rooms().at(0)->leave();
 }

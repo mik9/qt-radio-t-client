@@ -46,6 +46,7 @@ private slots:
     void room_joined();
     void on_join_button_clicked();
     void user_left_room();
+    void on_logout_button_clicked();
 
 signals:
     void send_button_clicked(QString message);
