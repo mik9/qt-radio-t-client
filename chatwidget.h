@@ -18,6 +18,7 @@
 #include <qxmpp/QXmppLogger.h>
 #include <qxmpp/QXmppMessage.h>
 #include <qxmpp/QXmppMucManager.h>
+#include <QStringList>
 #include "simplecrypt.h"
 
 namespace Ui {
@@ -65,6 +66,7 @@ private:
     QXmppClient xmpp_client;
     QXmppMucManager manager;
     QPropertyAnimation* m_chat_anim;
+    QString jabber_room;
 
     static QString MESSAGE_FORMAT;
     static QRegExp URL_REG_EXP;

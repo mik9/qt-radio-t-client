@@ -12,11 +12,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         chatwidget.cpp \
-    simplecrypt.cpp
+    simplecrypt.cpp \
+    twitterwidget.cpp
 
 HEADERS  += chatwidget.h \
     simplecrypt.h \
-    key.h
+    key.h \
+    twitterwidget.h
 
 FORMS    += chatwidget.ui
 
@@ -27,3 +29,6 @@ CONFIG(debug, debug|release) {
 }
 unix: CONFIG += link_pkgconfig
 unix: PKGCONFIG += qxmpp
+INCLUDEPATH += qtweetlib
+
+include(qtweetlib/qtweetlib.pro)

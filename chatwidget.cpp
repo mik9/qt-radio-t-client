@@ -79,6 +79,10 @@ ChatWidget::ChatWidget(QWidget *parent) :
     connect(&xmpp_client, SIGNAL(disconnected()), this, SLOT(xmpp_disconnected()));
 
     this->m_chat_anim = new QPropertyAnimation(this->ui->chat_edit->verticalScrollBar(), "value");
+    jabber_room = "online@conference.radio-t.com";
+
+//    QStringList args = QApplication::arguments();
+//    if ("")
 }
 
 ChatWidget::~ChatWidget()
@@ -284,7 +288,7 @@ void ChatWidget::on_join_button_clicked()
     this->ui->nick_frame->hide();
     this->ui->connecting_frame->show();
     this->ui->status_label->setText("Joining room...");
-    QXmppMucRoom *room = manager.addRoom("online@conference.radio-t.com");
+    QXmppMucRoom *room = manager.addRoom(jabber_room);
     this->m_nick = this->ui->nick_edit->text();
     room->setNickName(this->m_nick);
     connect(room, SIGNAL(messageReceived(QXmppMessage)), this, SLOT(message_received(QXmppMessage)), Qt::UniqueConnection);
@@ -311,7 +315,7 @@ void ChatWidget::user_left_room() {
 
 void ChatWidget::on_logout_button_clicked()
 {
-    this->ui->logout_button->setEnabled(false);
+    this->ui->logout_button->setEnabled(false); // prevent from second click
     QApplication::processEvents();
     this->manager.rooms().at(0)->leave();
 }
