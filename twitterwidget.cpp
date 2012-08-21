@@ -19,7 +19,6 @@ TwitterWidget::TwitterWidget(QWidget *parent) :
     connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(startUpdate()));
 
     mUpdateTimer.start(UPDATE_INTERVAL);
-    startUpdate();
 
     connect(&mRefreshTimer, SIGNAL(timeout()), this, SLOT(startRefresh()));
 
@@ -62,6 +61,9 @@ TwitterWidget::TwitterWidget(QWidget *parent) :
     avatar.setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
     this->setMinimumSize(370, 95);
+    this->slidingWidget->layout()->setContentsMargins(15,15,15,15);
+
+    hashtag = "#radiot";
 }
 
 void TwitterWidget::searchFinished(QTweetSearchPageResults r) {
@@ -74,7 +76,7 @@ void TwitterWidget::searchFinished(QTweetSearchPageResults r) {
 }
 
 void TwitterWidget::startUpdate() {
-    mTwitterSearch->start("#radiot", "", 100);
+    mTwitterSearch->start(hashtag, "", 100);
 }
 
 TwitterWidget::~TwitterWidget() {
@@ -84,8 +86,13 @@ TwitterWidget::~TwitterWidget() {
 bool TwitterWidget::event(QEvent *e) {
     if (e->type() == QEvent::Resize) {
         slidingWidget->setGeometry(QRect(slidingWidget->pos(), this->size()));
-        e->accept();
-        return true;
+    } else if (e->type() == e->Show) {
+        mUpdateTimer.start();
+        if (results.isEmpty()) {
+            startUpdate();
+        }
+    } else if (e->type() == e->Hide) {
+        mUpdateTimer.stop();
     }
     return QWidget::event(e);
 }

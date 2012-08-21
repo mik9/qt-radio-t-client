@@ -17,7 +17,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
-      <widget class="TwitterWidget" name="widget" native="true"/>
+      <widget class="TwitterWidget" name="twitter_widget" native="true"/>
      </item>
     </layout>
    </item>

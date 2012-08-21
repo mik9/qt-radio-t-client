@@ -36,7 +36,11 @@ class TwitterWidget : public QWidget
 public:
     explicit TwitterWidget(QWidget *parent = 0);
     ~TwitterWidget();
-    
+
+    void setHashtag(QString h) {
+        hashtag = h;
+    }
+
 signals:
     
 public slots:
@@ -50,6 +54,7 @@ private:
     QWidget* slidingWidget;
     QNetworkAccessManager NAManager;
     QPropertyAnimation mAnim;
+    QString hashtag;
 
     QLabel nickName;
     QLabel avatar;

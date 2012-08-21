@@ -81,8 +81,27 @@ ChatWidget::ChatWidget(QWidget *parent) :
     this->m_chat_anim = new QPropertyAnimation(this->ui->chat_edit->verticalScrollBar(), "value");
     jabber_room = "online@conference.radio-t.com";
 
-//    QStringList args = QApplication::arguments();
-//    if ("")
+    try {
+        QStringList args = QApplication::arguments();
+        foreach(QString arg, args) {
+            if (arg.startsWith("-conference")) {
+                jabber_room = arg.split("=")[1];
+            } else if (arg.startsWith("-twitter")) {
+                QString hashtag = arg.split("=")[1];
+                ui->twitter_widget->setHashtag(hashtag);
+            } else if (arg.startsWith("-no-twitter")) {
+                ui->twitter_widget->hide();
+            } else if (arg.startsWith("-no-timer")) {
+                // NOT IMPLEMENTED
+                qDebug() << "Not implemented yet.";
+            } else if (arg.startsWith("-custom-mirror")) {
+                // NOT IMPLEMENTED
+                qDebug() << "Not implemented yet.";
+            }
+        }
+    } catch (...) {
+        qDebug() << "Error parsing argument list.";
+    }
 }
 
 ChatWidget::~ChatWidget()
@@ -106,8 +125,6 @@ void ChatWidget::message_received(QXmppMessage m) {
     QDateTime stamp = m.stamp();
     QString stamp_str = "";
 
-    bool should_scroll_down = (this->ui->chat_edit->verticalScrollBar()->maximum()
-                               - this->ui->chat_edit->verticalScrollBar()->value()) < 10;
     if (!this->m_nick.isEmpty() && message.contains(this->m_nick)) {
         if (this->isActiveWindow()) {
             emit this->notify();
