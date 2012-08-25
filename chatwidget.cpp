@@ -123,6 +123,9 @@ void ChatWidget::message_received(QXmppMessage m) {
     QString original_nick = nick;
     QString message = m.body();
     QDateTime stamp = m.stamp();
+    if (stamp.isNull()) {
+        stamp = QDateTime::currentDateTime();
+    }
     QString stamp_str = "";
 
     if (!this->m_nick.isEmpty() && message.contains(this->m_nick)) {
