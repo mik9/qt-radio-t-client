@@ -55,6 +55,8 @@ private:
     QNetworkAccessManager NAManager;
     QPropertyAnimation mAnim;
     QString hashtag;
+    bool mouse_in;
+    bool animation_planned;
 
     QLabel nickName;
     QLabel avatar;
@@ -63,6 +65,7 @@ private:
     QPixmap nextPixmap;
     int id;
     bool event(QEvent *);
+    void doAnimOut();
 
     static QRegExp userRegExp;
     static QRegExp urlRegExp;

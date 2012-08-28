@@ -64,6 +64,9 @@ TwitterWidget::TwitterWidget(QWidget *parent) :
     this->slidingWidget->layout()->setContentsMargins(15,15,15,15);
 
     hashtag = "#radiot";
+
+    mouse_in = false;
+    animation_planned = false;
 }
 
 void TwitterWidget::searchFinished(QTweetSearchPageResults r) {
@@ -93,6 +96,14 @@ bool TwitterWidget::event(QEvent *e) {
         }
     } else if (e->type() == e->Hide) {
         mUpdateTimer.stop();
+    } else if (e->type() == QEvent::Enter) {
+        mouse_in = true;
+    } else if (e->type() == QEvent::Leave) {
+        mouse_in = false;
+        if(animation_planned) {
+            animation_planned = false;
+            doAnimOut();
+        }
     }
     return QWidget::event(e);
 }
@@ -109,14 +120,19 @@ void TwitterWidget::startRefresh() {
 void TwitterWidget::pictureDownloaded() {
     QNetworkReply *r = (QNetworkReply*)sender();
     nextPixmap.loadFromData(r->readAll());
-
+    if (mouse_in && !nickName.text().isEmpty()) {
+        animation_planned = true;
+    } else {
+        doAnimOut();
+    }
+}
+void TwitterWidget::doAnimOut() {
     mAnim.setStartValue(slidingWidget->pos());
     mAnim.setEndValue(QPoint(0, -150));
     mAnim.setEasingCurve(QEasingCurve::InBack);
     connect(&mAnim, SIGNAL(finished()), this, SLOT(finishRefresh()));
     mAnim.start();
 }
-
 
 QString choose_from_text(int n, int type) {
     static char* some[6][3] = {
