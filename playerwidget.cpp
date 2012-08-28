@@ -12,6 +12,7 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
     media_source = "http://stream.radio-t.com:8181/stream.m3u";
     connect(&media_player, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(stateChanged(Phonon::State,Phonon::State)));
     ui->playPause->setIcon(QApplication::style()->standardIcon(QStyle::SP_MediaPlay));
+    starting = false;
 }
 
 PlayerWidget::~PlayerWidget()
