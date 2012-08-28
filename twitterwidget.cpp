@@ -53,15 +53,13 @@ TwitterWidget::TwitterWidget(QWidget *parent) :
 
     text.setMinimumHeight(text.fontMetrics().height()*3);
     nickName.setMinimumHeight(nickName.fontMetrics().height());
-    nickName.setMaximumHeight(nickName.fontMetrics().height());
 
-    timeStamp.setMinimumHeight(timeStamp.fontMetrics().height());
     timeStamp.setMaximumHeight(timeStamp.fontMetrics().height());
     text.setAlignment(Qt::AlignLeft | Qt::AlignTop);
     avatar.setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
-    this->setMinimumSize(370, 95);
     this->slidingWidget->layout()->setContentsMargins(15,15,15,15);
+    this->setMinimumSize(l1->minimumSize());
 
     hashtag = "#radiot";
 
