@@ -44,7 +44,7 @@ void PlayerWidget::parse_playlist() {
         connect(r, SIGNAL(finished()), &l, SLOT(quit()));
         l.exec();
         while (!r->atEnd()) {
-            s = r->readLine();
+            s = QString(r->readLine()).replace("\r\n", "");
             if (!s.isEmpty() && !s.startsWith("#")) {
                 break;
             }
