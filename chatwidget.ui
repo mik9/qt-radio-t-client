@@ -17,10 +17,10 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
-      <widget class="PlayerWidget" name="widget" native="true"/>
+      <widget class="TwitterWidget" name="twitter_widget" native="true"/>
      </item>
      <item>
-      <widget class="TwitterWidget" name="twitter_widget" native="true"/>
+      <widget class="PlayerWidget" name="player_widget" native="true"/>
      </item>
     </layout>
    </item>
