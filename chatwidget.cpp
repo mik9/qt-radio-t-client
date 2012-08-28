@@ -128,6 +128,8 @@ void ChatWidget::message_received(QXmppMessage m) {
     }
     QString stamp_str = "";
 
+    bool should_scroll_down = (this->ui->chat_edit->verticalScrollBar()->maximum()
+                               - this->ui->chat_edit->verticalScrollBar()->value()) < 10;
     if (!this->m_nick.isEmpty() && message.contains(this->m_nick)) {
         if (this->isActiveWindow()) {
             emit this->notify();
@@ -157,13 +159,17 @@ void ChatWidget::message_received(QXmppMessage m) {
         if (++i>max)
             break;
     }
+    int old_pos = this->ui->chat_edit->verticalScrollBar()->value();
     this->ui->chat_edit->moveCursor(QTextCursor::End);
     this->ui->chat_edit->insertHtml(this->MESSAGE_FORMAT.arg(nick, username_to_color(original_nick).name(), message, stamp_str, original_nick));
-    if (this->ui->chat_edit->verticalScrollBar()->value() != this->ui->chat_edit->verticalScrollBar()->maximum()) {
+    this->ui->chat_edit->verticalScrollBar()->setValue(old_pos);
+    if (should_scroll_down || this->m_chat_anim->state() == QAbstractAnimation::Running) {
         this->m_chat_anim->setEndValue(this->ui->chat_edit->verticalScrollBar()->maximum());
         this->m_chat_anim->setDuration(400);
         this->m_chat_anim->setEasingCurve(QEasingCurve::OutQuad);
-        this->m_chat_anim->start();
+        if (this->m_chat_anim->state() != QAbstractAnimation::Running) {
+            this->m_chat_anim->start();
+        }
     }
 }
 
