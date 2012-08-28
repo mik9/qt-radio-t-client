@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1092</width>
-    <height>634</height>
+    <height>642</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,6 +16,9 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <item>
+      <widget class="PlayerWidget" name="widget" native="true"/>
+     </item>
      <item>
       <widget class="TwitterWidget" name="twitter_widget" native="true"/>
      </item>
@@ -301,6 +304,12 @@ p, li { white-space: pre-wrap; }
    <class>TwitterWidget</class>
    <extends>QWidget</extends>
    <header>twitterwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PlayerWidget</class>
+   <extends>QWidget</extends>
+   <header>playerwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

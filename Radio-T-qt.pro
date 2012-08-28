@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network xml
+QT       += core gui network xml phonon
 
 TARGET = Radio-T-qt
 TEMPLATE = app
@@ -13,14 +13,17 @@ TEMPLATE = app
 SOURCES += main.cpp\
         chatwidget.cpp \
     simplecrypt.cpp \
-    twitterwidget.cpp
+    twitterwidget.cpp \
+    playerwidget.cpp
 
 HEADERS  += chatwidget.h \
     simplecrypt.h \
     key.h \
-    twitterwidget.h
+    twitterwidget.h \
+    playerwidget.h
 
-FORMS    += chatwidget.ui
+FORMS    += chatwidget.ui \
+    playerwidget.ui
 
 CONFIG(debug, debug|release) {
     windows: LIBS += -lqxmpp_d0
