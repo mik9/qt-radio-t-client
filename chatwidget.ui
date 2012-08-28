@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>ChatWidget</string>
+   <string>Radio-T</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -36,7 +36,6 @@
        </property>
        <property name="font">
         <font>
-         <family>Segoe UI</family>
          <pointsize>12</pointsize>
         </font>
        </property>
