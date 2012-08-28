@@ -95,8 +95,8 @@ ChatWidget::ChatWidget(QWidget *parent) :
                 // NOT IMPLEMENTED
                 qDebug() << "Not implemented yet.";
             } else if (arg.startsWith("-custom-mirror")) {
-                // NOT IMPLEMENTED
-                qDebug() << "Not implemented yet.";
+                QString mirror = arg.split("=")[1];
+                ui->player_widget->setMediaSource(mirror);
             }
         }
     } catch (...) {
