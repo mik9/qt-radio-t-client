@@ -13,12 +13,12 @@ windows {
     LIBS += -ldnsapi -lws2_32
 }
 static {
-    # FIXME: g++ wont link this libraries unless we manually move it to the end in Makefile...
     windows {
-        LIBS += -ldxguid -lstrmiids -lmsdmo -ldmoguids
+        LIBS += -L$$[QT_INSTALL_DATA]/plugins/phonon_backend -lphonon_ds9 -ldxguid -lstrmiids -lmsdmo -ldmoguids
     }
     QTPLUGIN += phonon_ds9
     DEFINES += STATIC
+    QMAKE_CXXFLAGS += -flto
     message("Static build.")
 }
 
