@@ -4,11 +4,23 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network xml phonon
+QT       += core gui network xml phonon opengl
 
 TARGET = Radio-T-qt
 TEMPLATE = app
 
+windows {
+    LIBS += -ldnsapi -lws2_32
+}
+static {
+    # FIXME: g++ wont link this libraries unless we manually move it to the end in Makefile...
+    windows {
+        LIBS += -ldxguid -lstrmiids -lmsdmo -ldmoguids
+    }
+    QTPLUGIN += phonon_ds9
+    DEFINES += STATIC
+    message("Static build.")
+}
 
 SOURCES += main.cpp\
         chatwidget.cpp \
@@ -30,4 +42,3 @@ INCLUDEPATH += qtweetlib base client
 include(qtweetlib/qtweetlib.pro)
 include(base/base.pro)
 include(client/client.pro)
-LIBS += -ldnsapi -lws2_32
