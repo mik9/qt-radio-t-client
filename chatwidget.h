@@ -14,10 +14,10 @@
 #include <QListWidgetItem>
 #include <QPropertyAnimation>
 #include <QEasingCurve>
-#include <qxmpp/QXmppClient.h>
-#include <qxmpp/QXmppLogger.h>
-#include <qxmpp/QXmppMessage.h>
-#include <qxmpp/QXmppMucManager.h>
+#include <client/QXmppClient.h>
+#include <base/QXmppLogger.h>
+#include <base/QXmppMessage.h>
+#include <client/QXmppMucManager.h>
 #include <QStringList>
 #include "simplecrypt.h"
 

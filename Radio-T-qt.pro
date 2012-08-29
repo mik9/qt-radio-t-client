@@ -25,13 +25,9 @@ HEADERS  += chatwidget.h \
 FORMS    += chatwidget.ui \
     playerwidget.ui
 
-CONFIG(debug, debug|release) {
-    windows: LIBS += -lqxmpp_d0
-} else {
-    windows: LIBS += -lqxmpp0
-}
-unix: CONFIG += link_pkgconfig
-unix: PKGCONFIG += qxmpp
-INCLUDEPATH += qtweetlib
+INCLUDEPATH += qtweetlib base client
 
 include(qtweetlib/qtweetlib.pro)
+include(base/base.pro)
+include(client/client.pro)
+LIBS += -ldnsapi -lws2_32
