@@ -81,26 +81,24 @@ ChatWidget::ChatWidget(QWidget *parent) :
     this->m_chat_anim = new QPropertyAnimation(this->ui->chat_edit->verticalScrollBar(), "value");
     jabber_room = "online@conference.radio-t.com";
 
-    try {
-        QStringList args = QApplication::arguments();
-        foreach(QString arg, args) {
-            if (arg.startsWith("-conference")) {
-                jabber_room = arg.split("=")[1];
-            } else if (arg.startsWith("-twitter")) {
-                QString hashtag = arg.split("=")[1];
-                ui->twitter_widget->setHashtag(hashtag);
-            } else if (arg.startsWith("-no-twitter")) {
-                ui->twitter_widget->hide();
-            } else if (arg.startsWith("-no-timer")) {
-                // NOT IMPLEMENTED
-                qDebug() << "Not implemented yet.";
-            } else if (arg.startsWith("-custom-mirror")) {
-                QString mirror = arg.split("=")[1];
-                ui->player_widget->setMediaSource(mirror);
-            }
+    QStringList args = QApplication::arguments();
+    foreach(QString arg, args) {
+        if (arg.startsWith("-no-twitter")) {
+            ui->twitter_widget->hide();
+        } else if (arg.startsWith("-no-timer")) {
+            // NOT IMPLEMENTED
+            qDebug() << "Not implemented yet.";
+        } else if (arg.split("=").length() != 2) {
+            continue;
+        } else if (arg.startsWith("-conference")) {
+            jabber_room = arg.split("=")[1];
+        } else if (arg.startsWith("-twitter")) {
+            QString hashtag = arg.split("=")[1];
+            ui->twitter_widget->setHashtag(hashtag);
+        } else if (arg.startsWith("-custom-mirror")) {
+            QString mirror = arg.split("=")[1];
+            ui->player_widget->setMediaSource(mirror);
         }
-    } catch (...) {
-        qDebug() << "Error parsing argument list.";
     }
 }
 
