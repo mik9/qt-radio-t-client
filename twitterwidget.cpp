@@ -202,13 +202,15 @@ void TwitterWidget::finishRefresh() {
         n = secs;
     }
 
-    timeStamp.setText(QString::fromUtf8("<span style=\"font-size:11px;color:#444;\">примерно %1 %2 назад из <span>%3</span>").arg(QString::number(n), word,
+    timeStamp.setText(QString::fromUtf8("<span style=\"font-size:11px;color:#444;\">примерно <a href=\"https://twitter.com/%4/status/%5\" style=\"color:#555;text-decoration: none;\">%1 %2 назад</a> из <span>%3</span>").arg(QString::number(n), word,
                                                                                                                             results.at(id).source()
                                                                                                                             .replace("&lt;", "<")
                                                                                                                             .replace("&gt;", ">")
                                                                                                                             .replace("&quot;", "\"")
                                                                                                                             .replace("&amp;", "&")
-                                                                                                                            .replace("<a", "<a style=\"color:#555;text-decoration: none;\" ")));
+                                                                                                                            .replace("<a", "<a style=\"color:#555;text-decoration: none;\" "),
+                                                                                                                            results.at(id).fromUser(),
+                                                                                                                            QString::number(results.at(id).id())));
 
 
     disconnect(&mAnim, SIGNAL(finished()), this, SLOT(finishRefresh()));
