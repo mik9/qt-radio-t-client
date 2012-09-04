@@ -69,6 +69,7 @@ private:
     QString jabber_room;
 
     static QString MESSAGE_FORMAT;
+    static QString ME_MESSAGE_FORMAT;
     static QRegExp URL_REG_EXP;
     static QRegExp EMAIL_REG_EXP;
     static QColor username_to_color(QString u);

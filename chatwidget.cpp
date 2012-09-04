@@ -3,6 +3,7 @@
 #include "key.h"
 
 QString ChatWidget::MESSAGE_FORMAT = "<table cellspacing=0 cellpadding=0 border=0><tr><td width=80>%4&nbsp;</td><td width=120 align=right style=\"padding-right:2\"><a href=\"user://%5/\"><font color=\"%2\">%1</font></a>:</td><td style=\"padding-left:3;background-color:#fff;\" width=100%>%3 </td></tr></table>";
+QString ChatWidget::ME_MESSAGE_FORMAT = "<table cellspacing=0 cellpadding=0 border=0><tr><td width=80>%4&nbsp;</td><td width=120 align=right style=\"padding-right:2\">&nbsp;</td><td style=\"padding-left:3;background-color:#fff;\" width=100%><i><a href=\"user://%5/\"><font color=\"%2\">%1</font></a> %3</i></td></tr></table>";
 QRegExp ChatWidget::URL_REG_EXP("(\\w+://\\S+\\.\\S+)");
 QRegExp ChatWidget::EMAIL_REG_EXP("\\S+@(\\S+\\.\\S+)");
 
@@ -159,7 +160,12 @@ void ChatWidget::message_received(QXmppMessage m) {
     }
     int old_pos = this->ui->chat_edit->verticalScrollBar()->value();
     this->ui->chat_edit->moveCursor(QTextCursor::End);
-    this->ui->chat_edit->insertHtml(this->MESSAGE_FORMAT.arg(nick, username_to_color(original_nick).name(), message, stamp_str, original_nick));
+    if (message.startsWith("/me ")) {
+        message.replace(0, 4, "");
+        this->ui->chat_edit->insertHtml(this->ME_MESSAGE_FORMAT.arg(nick, username_to_color(original_nick).name(), message, stamp_str, original_nick));
+    } else {
+        this->ui->chat_edit->insertHtml(this->MESSAGE_FORMAT.arg(nick, username_to_color(original_nick).name(), message, stamp_str, original_nick));
+    }
     this->ui->chat_edit->verticalScrollBar()->setValue(old_pos);
     if (should_scroll_down || this->m_chat_anim->state() == QAbstractAnimation::Running) {
         this->m_chat_anim->setEndValue(this->ui->chat_edit->verticalScrollBar()->maximum());
