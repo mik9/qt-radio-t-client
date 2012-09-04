@@ -78,10 +78,13 @@ p, li { white-space: pre-wrap; }
    <item>
     <widget class="QFrame" name="message_frame">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <property name="margin">
@@ -110,10 +113,13 @@ p, li { white-space: pre-wrap; }
    <item>
     <widget class="QFrame" name="login_frame">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="margin">
@@ -212,10 +218,13 @@ p, li { white-space: pre-wrap; }
    <item>
     <widget class="QFrame" name="connecting_frame">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <property name="topMargin">
@@ -240,10 +249,13 @@ p, li { white-space: pre-wrap; }
    <item>
     <widget class="QFrame" name="nick_frame">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <property name="margin">
