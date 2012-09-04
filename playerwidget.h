@@ -10,6 +10,7 @@
 #include <mpg123.h>
 #include <ao/ao.h>
 #include <QTimer>
+#include <QSettings>
 
 #define OUTPUT_BUFFER_SIZE 16*1024
 #define PRECACHE_SIZE 64*1024
@@ -35,6 +36,8 @@ private slots:
     void decoder();
     void stateChanged();
     void playlist_downloaded();
+
+    void on_volumeSlider_valueChanged(int value);
 
 private:
     Ui::PlayerWidget *ui;

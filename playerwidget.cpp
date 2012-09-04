@@ -11,6 +11,11 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
     starting = false;
     playing = false;
     device = NULL;
+    mh = NULL;
+    QSettings settings;
+    int volume = settings.value("volume", 100).toInt();
+    ui->volumeSlider->setValue(volume);
+
 
     int res = mpg123_init();
     if (res != MPG123_OK) {
@@ -25,6 +30,8 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
 
 PlayerWidget::~PlayerWidget()
 {
+    QSettings settings;
+    settings.setValue("volume", ui->volumeSlider->value());
     playing = false;
     f.waitForFinished();
     ao_shutdown();
@@ -68,6 +75,7 @@ void PlayerWidget::decoder() {
         long rate;
         int ch, enc;
         mpg123_getformat(mh, &rate, &ch, &enc);
+        mpg123_volume(mh, ui->volumeSlider->value()/100.0);
         ao_sample_format format;
         memset(&format, 0, sizeof(format));
         format.channels = ch;
@@ -142,4 +150,11 @@ void PlayerWidget::close_ao_device() {
     f.waitForFinished();
     ui->playPause->setEnabled(true);
     QMetaObject::invokeMethod(this, "stateChanged");
+}
+
+void PlayerWidget::on_volumeSlider_valueChanged(int value)
+{
+    if (mh) {
+        mpg123_volume(mh, value/100.0);
+    }
 }
