@@ -58,7 +58,7 @@ TwitterWidget::TwitterWidget(QWidget *parent) :
     text.setAlignment(Qt::AlignLeft | Qt::AlignTop);
     avatar.setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
-    this->slidingWidget->layout()->setContentsMargins(15,15,15,15);
+    this->slidingWidget->layout()->setContentsMargins(30,15,15,15);
     this->setMinimumSize(l1->minimumSize());
 
     hashtag = "#radiot";
@@ -69,6 +69,13 @@ TwitterWidget::TwitterWidget(QWidget *parent) :
 
 void TwitterWidget::searchFinished(QTweetSearchPageResults r) {
     results = r.results();
+    for(int i;i<results.length();i++) {
+        QTweetSearchResult r = results.at(i);
+        if (r.text().length() < 8) {
+            results.removeAt(i);
+            i--;
+        }
+    }
 
     if (!mRefreshTimer.isActive()) {
         mRefreshTimer.start(8 * 1000);
