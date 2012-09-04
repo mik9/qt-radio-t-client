@@ -1,6 +1,24 @@
 #include "playerwidget.h"
 #include "ui_playerwidget.h"
 
+class VolumeToolTipHider : public QObject {
+public:
+    VolumeToolTipHider(PlayerWidget* _w) : w(_w) {}
+private:
+    PlayerWidget* w;
+protected:
+    bool eventFilter(QObject *, QEvent *e) {
+        if (e->type() == QEvent::MouseButtonRelease) {
+            qDebug() << "here";
+            QMouseEvent* me = (QMouseEvent*)e;
+            if (me->button() == Qt::LeftButton) {
+                w->volume_label.hide();
+            }
+        }
+        return false;
+    }
+};
+
 PlayerWidget::PlayerWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PlayerWidget)
@@ -26,6 +44,10 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
         qDebug() << "call mpg123_new() failed";
     }
     ao_initialize();
+
+    volume_label.setWindowFlags(Qt::ToolTip);
+
+    ui->volumeSlider->installEventFilter(new VolumeToolTipHider(this));
 }
 
 PlayerWidget::~PlayerWidget()
@@ -154,6 +176,15 @@ void PlayerWidget::close_ao_device() {
 
 void PlayerWidget::on_volumeSlider_valueChanged(int value)
 {
+    QPoint pos = QCursor::pos();
+    pos.setX(pos.x() + 15);
+    volume_label.move(pos);
+    volume_label.setText(QString::number(value));
+    volume_label.resize(volume_label.fontMetrics().width(volume_label.text())+6, volume_label.fontMetrics().height()+6);
+    volume_label.setMargin(3);
+    if (volume_label.isHidden()) {
+        volume_label.show();
+    }
     if (mh) {
         mpg123_volume(mh, value/100.0);
     }

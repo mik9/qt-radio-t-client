@@ -11,6 +11,9 @@
 #include <ao/ao.h>
 #include <QTimer>
 #include <QSettings>
+#include <QFrame>
+#include <QLabel>
+#include <QMouseEvent>
 
 #define OUTPUT_BUFFER_SIZE 16*1024
 #define PRECACHE_SIZE 64*1024
@@ -28,6 +31,7 @@ public:
     explicit PlayerWidget(QWidget *parent = 0);
     ~PlayerWidget();
     void setMediaSource(QString new_media_source);
+    QLabel volume_label;
     
 public slots:
     void on_playPause_clicked();
