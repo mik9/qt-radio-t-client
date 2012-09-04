@@ -87,3 +87,6 @@ android:SOURCES += base/qdnslookup_stub.cpp
 else:symbian:SOURCES += base/qdnslookup_symbian.cpp
 else:unix:SOURCES += base/qdnslookup_unix.cpp
 else:win32:SOURCES += base/qdnslookup_win.cpp
+win32 {
+    LIBS += -ldnsapi -lws2_32
+}

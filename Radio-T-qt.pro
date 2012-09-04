@@ -4,22 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network xml phonon opengl
+QT       += core gui network xml
 
 TARGET = Radio-T-qt
 TEMPLATE = app
 
-windows {
-    LIBS += -ldnsapi -lws2_32
-}
-static {
-    windows {
-        LIBS += -L$$[QT_INSTALL_DATA]/plugins/phonon_backend -lphonon_ds9 -ldxguid -lstrmiids -lmsdmo -ldmoguids
-        QMAKE_LFLAGS += -static
-    }
-    DEFINES += STATIC
-    message("Static build.")
-}
+LIBS += -lmpg123-0 -lao-4
 
 SOURCES += main.cpp\
         chatwidget.cpp \
