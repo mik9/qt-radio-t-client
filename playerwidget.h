@@ -2,13 +2,18 @@
 #define PLAYERWIDGET_H
 
 #include <QWidget>
-#include <phonon/MediaObject>
-#include <phonon/AudioOutput>
 #include <QUrl>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QtConcurrentRun>
+#include <mpg123.h>
+#include <ao/ao.h>
+#include <QTimer>
+
+#define OUTPUT_BUFFER_SIZE 16*1024
+#define PRECACHE_SIZE 64*1024
+#define CHUNK_SIZE 16*1024
 
 namespace Ui {
 class PlayerWidget;
@@ -27,16 +32,25 @@ public slots:
     void on_playPause_clicked();
 
 private slots:
-    void stateChanged(Phonon::State from, Phonon::State to);
-    void startPlaying(QString url);
+    void decoder();
+    void stateChanged();
+    void playlist_downloaded();
 
 private:
     Ui::PlayerWidget *ui;
-    Phonon::MediaObject media_player;
     QString media_source;
     bool starting;
+    mpg123_handle* mh;
+    ao_device* device;
+    QFuture<void> f;
+    bool playing;
+    bool precaching;
+    QNetworkAccessManager m;
 
     void parse_playlist();
+    void play();
+    void close_ao_device();
+    void startPlaying(QString url);
 };
 
 #endif // PLAYERWIDGET_H
