@@ -9,7 +9,8 @@ QT       += core gui network xml
 TARGET = Radio-T-qt
 TEMPLATE = app
 
-LIBS += -lmpg123-0 -lao-4
+win32:LIBS += -lmpg123-0 -lao-4
+else:LIBS += -lmpg123 -lao
 
 SOURCES += main.cpp\
         chatwidget.cpp \
