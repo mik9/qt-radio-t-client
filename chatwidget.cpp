@@ -31,7 +31,7 @@ ChatWidget::ChatWidget(QWidget *parent) :
     connect(this->ui->message_edit, SIGNAL(returnPressed()), this, SLOT(on_send_button_clicked()));
     this->ui->message_edit->setFocus();
 
-    QSettings settings("mik_os", "qt/Radio-T client");
+    QSettings settings;
     this->m_username = settings.value("username", "").toString();
     SimpleCrypt s(CRYPT_KEY);
     this->m_password = s.decryptToString(settings.value("password", "").toString());
@@ -105,7 +105,7 @@ ChatWidget::ChatWidget(QWidget *parent) :
 
 ChatWidget::~ChatWidget()
 {
-    QSettings settings("mik_os", "qt/Radio-T client");
+    QSettings settings;
     settings.setValue("username", this->m_username);
     SimpleCrypt s(CRYPT_KEY);
     settings.setValue("password", s.encryptToString(this->m_password));

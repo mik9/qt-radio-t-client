@@ -6,6 +6,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    a.setApplicationName("qt/Radio-T client");
+    a.setOrganizationName("mik_os");
 #ifdef QT_NO_DEBUG
     a.addLibraryPath(QDir::current().filePath("plugins"));
 #endif
