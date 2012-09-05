@@ -63,7 +63,7 @@ private:
     QLabel text;
     QLabel timeStamp;
     QPixmap nextPixmap;
-    int id;
+    QTweetSearchResult currentTweet;
     bool event(QEvent *);
     void doAnimOut();
 

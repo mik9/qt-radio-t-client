@@ -68,6 +68,9 @@ TwitterWidget::TwitterWidget(QWidget *parent) :
 }
 
 void TwitterWidget::searchFinished(QTweetSearchPageResults r) {
+    if (r.results().isEmpty()) {
+        return;
+    }
     results = r.results();
     for(int i;i<results.length();i++) {
         QTweetSearchResult r = results.at(i);
@@ -122,8 +125,9 @@ void TwitterWidget::startRefresh() {
     if (results.isEmpty()) {
         return;
     }
-    id = rand() % results.length();
-    QNetworkReply *r = NAManager.get(QNetworkRequest(QUrl(results.at(id).profileImageUrl())));
+    int id = rand() % results.length();
+    currentTweet = results.at(id);
+    QNetworkReply *r = NAManager.get(QNetworkRequest(QUrl(currentTweet.profileImageUrl())));
     connect(r, SIGNAL(finished()), this, SLOT(pictureDownloaded()));
 }
 
@@ -168,15 +172,15 @@ QString choose_from_text(int n, int type) {
 void TwitterWidget::finishRefresh() {
     avatar.setPixmap(nextPixmap.copy());
     avatar.setMaximumSize(nextPixmap.size());
-    nickName.setText(tr("<a href=\"https://twitter.com/%1/\" style=\"color:#555;text-decoration: none;\">%1 (%2)</a>").arg(results.at(id).fromUser(), results.at(id).fromUserName()));
+    nickName.setText(tr("<a href=\"https://twitter.com/%1/\" style=\"color:#555;text-decoration: none;\">%1 (%2)</a>").arg(currentTweet.fromUser(), currentTweet.fromUserName()));
 
-    QString body = Qt::escape(results.at(id).text());
+    QString body = Qt::escape(currentTweet.text());
     body.replace(urlRegExp, "<a href=\"\\1\">\\1</a>")
             .replace(userRegExp, "<a href=\"https://twitter.com/\\1/\">@\\1</a>\\2")
             .replace(hashTagRegExp, "<a href=\"https://twitter.com/#!/search/%23\\1\">#\\1</a>\\2");
     text.setText(body);
 
-    QDateTime stamp = results.at(id).createdAt();
+    QDateTime stamp = currentTweet.createdAt();
     int diff = stamp.secsTo(QDateTime::currentDateTime());
     int years = diff / YEAR; diff -= YEAR * years;
     int months = diff / MONTH; diff -= MONTH * months;
@@ -208,14 +212,14 @@ void TwitterWidget::finishRefresh() {
     }
 
     timeStamp.setText(QString::fromUtf8("<span style=\"font-size:11px;color:#444;\">примерно <a href=\"https://twitter.com/%4/status/%5\" style=\"color:#555;text-decoration: none;\">%1 %2 назад</a> из <span>%3</span>").arg(QString::number(n), word,
-                                                                                                                            results.at(id).source()
+                                                                                                                            currentTweet.source()
                                                                                                                             .replace("&lt;", "<")
                                                                                                                             .replace("&gt;", ">")
                                                                                                                             .replace("&quot;", "\"")
                                                                                                                             .replace("&amp;", "&")
                                                                                                                             .replace("<a", "<a style=\"color:#555;text-decoration: none;\" "),
-                                                                                                                            results.at(id).fromUser(),
-                                                                                                                            QString::number(results.at(id).id())));
+                                                                                                                            currentTweet.fromUser(),
+                                                                                                                            QString::number(currentTweet.id())));
 
 
     disconnect(&mAnim, SIGNAL(finished()), this, SLOT(finishRefresh()));
