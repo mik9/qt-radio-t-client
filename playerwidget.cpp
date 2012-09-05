@@ -92,6 +92,7 @@ void PlayerWidget::decoder() {
     QNetworkReply *r = (QNetworkReply*)sender();
     if (!playing) {
         r->close();
+        r->deleteLater();
         return;
     }
     if (precaching && r->bytesAvailable() < PRECACHE_SIZE){
@@ -151,10 +152,11 @@ void PlayerWidget::playlist_downloaded() {
     while (!r->atEnd()) {
         s = QString(r->readLine()).replace("\r\n", "");
         if (!s.isEmpty() && !s.startsWith("#")) {
-            startPlaying(s);
-            return;
+            break;
         }
     }
+    r->deleteLater();
+    startPlaying(s);
 }
 
 void PlayerWidget::startPlaying(QString url) {
