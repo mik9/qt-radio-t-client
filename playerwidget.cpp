@@ -1,6 +1,11 @@
 #include "playerwidget.h"
 #include "ui_playerwidget.h"
 
+class Sleeper : public QThread {
+public:
+    static void msleep(unsigned long v) { QThread::msleep(v); }
+};
+
 class VolumeToolTipHider : public QObject {
 public:
     VolumeToolTipHider(PlayerWidget* _w) : w(_w) {}
@@ -136,7 +141,7 @@ void PlayerWidget::play() {
         if (res == MPG123_OK) {
             ao_play(device, reinterpret_cast<char*>(data), bytes);
         } else {
-            QEventLoop loop; QTimer::singleShot(10, &loop, SLOT(quit())); loop.exec();
+            Sleeper::msleep(10);
         }
     }
     ao_close(device);
