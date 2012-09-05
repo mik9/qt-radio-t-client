@@ -11,13 +11,13 @@
 #include <ao/ao.h>
 #include <QTimer>
 #include <QSettings>
-#include <QFrame>
 #include <QLabel>
 #include <QMouseEvent>
 
 #define OUTPUT_BUFFER_SIZE 16*1024
 #define PRECACHE_SIZE 64*1024
 #define CHUNK_SIZE 16*1024
+#define HIDE_TIMER_INTERVAL 1000
 
 namespace Ui {
 class PlayerWidget;
@@ -53,6 +53,7 @@ private:
     bool playing;
     bool precaching;
     QNetworkAccessManager m;
+    QTimer volume_label_hide_timer;
 
     void parse_playlist();
     void play();

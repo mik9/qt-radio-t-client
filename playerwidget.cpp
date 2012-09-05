@@ -4,20 +4,27 @@
 class VolumeToolTipHider : public QObject {
 public:
     VolumeToolTipHider(PlayerWidget* _w) : w(_w) {}
+    static bool mouse_pressed;
 private:
     PlayerWidget* w;
 protected:
     bool eventFilter(QObject *, QEvent *e) {
         if (e->type() == QEvent::MouseButtonRelease) {
-            qDebug() << "here";
             QMouseEvent* me = (QMouseEvent*)e;
             if (me->button() == Qt::LeftButton) {
                 w->volume_label.hide();
+                mouse_pressed = false;
+            }
+        } else if (e->type() == QEvent::MouseButtonPress) {
+            QMouseEvent* me = (QMouseEvent*)e;
+            if (me->button() == Qt::LeftButton) {
+                mouse_pressed = true;
             }
         }
         return false;
     }
 };
+bool VolumeToolTipHider::mouse_pressed(false);
 
 PlayerWidget::PlayerWidget(QWidget *parent) :
     QWidget(parent),
@@ -48,6 +55,10 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
     volume_label.setWindowFlags(Qt::ToolTip);
 
     ui->volumeSlider->installEventFilter(new VolumeToolTipHider(this));
+
+    volume_label_hide_timer.setSingleShot(true);
+    connect(&volume_label_hide_timer, SIGNAL(timeout()), &volume_label, SLOT(hide()));
+    volume_label_hide_timer.setInterval(HIDE_TIMER_INTERVAL);
 }
 
 PlayerWidget::~PlayerWidget()
@@ -184,6 +195,9 @@ void PlayerWidget::on_volumeSlider_valueChanged(int value)
     volume_label.setMargin(3);
     if (volume_label.isHidden()) {
         volume_label.show();
+    }
+    if (!VolumeToolTipHider::mouse_pressed) {
+        volume_label_hide_timer.start();
     }
     if (mh) {
         mpg123_volume(mh, value/100.0);
