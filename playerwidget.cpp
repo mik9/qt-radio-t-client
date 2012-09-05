@@ -41,7 +41,6 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
     int volume = settings.value("volume", 100).toInt();
     ui->volumeSlider->setValue(volume);
 
-
     int res = mpg123_init();
     if (res != MPG123_OK) {
         qDebug() << "call mpg123_init() failed";
@@ -83,6 +82,13 @@ void PlayerWidget::stateChanged() {
 
 void PlayerWidget::setMediaSource(QString new_media_source) {
     media_source = new_media_source;
+}
+
+void PlayerWidget::streaming_finished() {
+    playing = false;
+    stateChanged();
+    QNetworkReply *r = (QNetworkReply*)sender();
+    r->deleteLater();
 }
 
 void PlayerWidget::decoder() {
@@ -163,6 +169,7 @@ void PlayerWidget::startPlaying(QString url) {
     precaching = true;
     QNetworkReply *r = m.get(QNetworkRequest(url));
     connect(r, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(decoder()), Qt::QueuedConnection);
+    connect(r, SIGNAL(finished()), this, SLOT(streaming_finished()));
 }
 
 void PlayerWidget::on_playPause_clicked() {

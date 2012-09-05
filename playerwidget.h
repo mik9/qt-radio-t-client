@@ -40,6 +40,7 @@ private slots:
     void decoder();
     void stateChanged();
     void playlist_downloaded();
+    void streaming_finished();
 
     void on_volumeSlider_valueChanged(int value);
 
