@@ -103,11 +103,16 @@ bool TwitterWidget::event(QEvent *e) {
         mUpdateTimer.stop();
     } else if (e->type() == QEvent::Enter) {
         mouse_in = true;
+        if (mAnim.state() == QPropertyAnimation::Running && mAnim.easingCurve() == QEasingCurve::InBack) {
+            mAnim.pause();
+        }
     } else if (e->type() == QEvent::Leave) {
         mouse_in = false;
         if(animation_planned) {
             animation_planned = false;
             doAnimOut();
+        } else if (mAnim.state() == QPropertyAnimation::Paused && mAnim.easingCurve() == QEasingCurve::InBack) {
+            mAnim.resume();
         }
     }
     return QWidget::event(e);
