@@ -43,6 +43,7 @@ private slots:
     void streaming_finished();
 
     void on_volumeSlider_valueChanged(int value);
+    void on_muteButton_toggled(bool checked);
 
 private:
     Ui::PlayerWidget *ui;
@@ -51,15 +52,18 @@ private:
     mpg123_handle* mh;
     ao_device* device;
     QFuture<void> f;
-    bool playing;
+    volatile bool playing;
     bool precaching;
     QNetworkAccessManager m;
     QTimer volume_label_hide_timer;
+    double last_volume;
 
     void parse_playlist();
     void play();
     void close_ao_device();
     void startPlaying(QString url);
+    qreal pcmToReal(qint16 pcm);
+    void emitter(unsigned char* data, size_t len);
 };
 
 #endif // PLAYERWIDGET_H

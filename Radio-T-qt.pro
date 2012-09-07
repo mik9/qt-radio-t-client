@@ -11,18 +11,29 @@ TEMPLATE = app
 
 win32:LIBS += -lmpg123-0 -lao-4
 else:LIBS += -lmpg123 -lao
+#LIBS += -lfftreal
 
 SOURCES += main.cpp\
         chatwidget.cpp \
     simplecrypt.cpp \
     twitterwidget.cpp \
-    playerwidget.cpp
+    playerwidget.cpp \
+#    spectrumanalyser.cpp \
+#    frequencyspectrum.cpp \
+#    utils.cpp \
+    spectrumwidget.cpp
 
 HEADERS  += chatwidget.h \
     simplecrypt.h \
     key.h \
     twitterwidget.h \
-    playerwidget.h
+    playerwidget.h \
+#    spectrumanalyser.h \
+#    frequencyspectrum.h \
+#    utils.h \
+#    spectrum.h \
+    sleeper.h \
+    spectrumwidget.h \
 
 FORMS    += chatwidget.ui \
     playerwidget.ui

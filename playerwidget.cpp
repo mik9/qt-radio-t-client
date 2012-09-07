@@ -1,10 +1,6 @@
 #include "playerwidget.h"
 #include "ui_playerwidget.h"
-
-class Sleeper : public QThread {
-public:
-    static void msleep(unsigned long v) { QThread::msleep(v); }
-};
+#include <sleeper.h>
 
 class VolumeToolTipHider : public QObject {
 public:
@@ -38,6 +34,7 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
     ui->setupUi(this);
     media_source = "http://stream.radio-t.com:8181/stream.m3u";
     ui->playPause->setIcon(QApplication::style()->standardIcon(QStyle::SP_MediaPlay));
+    ui->muteButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_MediaVolume));
     starting = false;
     playing = false;
     device = NULL;
@@ -120,6 +117,7 @@ void PlayerWidget::decoder() {
         long rate;
         int ch, enc;
         mpg123_getformat(mh, &rate, &ch, &enc);
+        ui->spectrum->setSampleSize(mpg123_encsize(enc));
         mpg123_volume(mh, ui->volumeSlider->value()/100.0);
         ao_sample_format format;
         memset(&format, 0, sizeof(format));
@@ -132,6 +130,23 @@ void PlayerWidget::decoder() {
     }
 }
 
+const quint16 PCMS16MaxAmplitude =  32768; // because minimum is -32768
+inline qreal PlayerWidget::pcmToReal(qint16 pcm)
+{
+    return qreal(pcm) / PCMS16MaxAmplitude;
+}
+
+void PlayerWidget::emitter(unsigned char *data, size_t len) {
+    float *f = new float[len/2];
+    for(size_t i=0; i < len; i+=2) {
+        const qint16 pcmSample = *reinterpret_cast<const qint16*>(data+i);
+        f[i/2] = qAbs(pcmToReal(pcmSample));
+    }
+    ui->spectrum->new_data(f, len/2);
+    delete [] data;
+}
+
+bool _f = true;
 void PlayerWidget::play() {
     size_t bytes;
     int res;
@@ -139,6 +154,14 @@ void PlayerWidget::play() {
     while (playing) {
         res = mpg123_read(mh, data, OUTPUT_BUFFER_SIZE, &bytes);
         if (res == MPG123_OK) {
+            unsigned char* data2 = new unsigned char[bytes];
+            memcpy(data2, data, bytes);
+            QtConcurrent::run(this, &PlayerWidget::emitter, data2, bytes);
+            if (_f) {
+                ui->spectrum->setSPF(mpg123_spf(mh));
+                ui->spectrum->setTPF(mpg123_tpf(mh));
+                _f = false;
+            }
             ao_play(device, reinterpret_cast<char*>(data), bytes);
         } else {
             Sleeper::msleep(10);
@@ -215,5 +238,16 @@ void PlayerWidget::on_volumeSlider_valueChanged(int value)
     }
     if (mh) {
         mpg123_volume(mh, value/100.0);
+    }
+}
+void PlayerWidget::on_muteButton_toggled(bool checked) {
+    if (checked) {
+        double d1,d2;
+        mpg123_getvolume(mh, &last_volume, &d1, &d2);
+        mpg123_volume(mh, 0);
+        ui->muteButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_MediaVolumeMuted));
+    } else {
+        mpg123_volume(mh, last_volume);
+        ui->muteButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_MediaVolume));
     }
 }

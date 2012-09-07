@@ -6,6 +6,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    qRegisterMetaType<size_t>("size_t");
     a.setApplicationName("qt/Radio-T client");
     a.setOrganizationName("mik_os");
 #ifdef QT_NO_DEBUG
