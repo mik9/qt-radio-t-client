@@ -2,6 +2,13 @@
 #include "ui_playerwidget.h"
 #include <sleeper.h>
 
+#if MPG123_API_VERSION < 26
+#define mpg123_encsize(mh) 2
+#endif
+#if MPG123_API_VERSION < 32
+#define mpg123_spf(mh) 1104
+#endif
+
 class VolumeToolTipHider : public QObject {
 public:
     VolumeToolTipHider(PlayerWidget* _w) : w(_w) {}
