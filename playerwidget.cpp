@@ -124,15 +124,27 @@ void PlayerWidget::decoder() {
         long rate;
         int ch, enc;
         mpg123_getformat(mh, &rate, &ch, &enc);
-        ui->spectrum->setSampleSize(mpg123_encsize(enc));
+        int sampleSize = mpg123_encsize(enc);
+        ui->spectrum->setSampleSize(sampleSize);
         mpg123_volume(mh, ui->volumeSlider->value()/100.0);
         ao_sample_format format;
         memset(&format, 0, sizeof(format));
         format.channels = ch;
         format.rate = rate;
-        format.bits = 16;
+        format.bits = sampleSize * 8;
         format.byte_format = AO_FMT_NATIVE;
-        device = ao_open_live(ao_default_driver_id(), &format, NULL);
+        int driver_id = -1;
+#ifdef Q_OS_LINUX
+        driver_id = ao_driver_id("pulse");
+#endif
+        if (driver_id == -1) {
+            // Fallback to default driver
+             driver_id = ao_default_driver_id();
+        }
+        if (driver_id == -1) {
+            qDebug() << "Cannot open audio driver!!!";
+        }
+        device = ao_open_live(driver_id, &format, NULL);
         f = QtConcurrent::run(this, &PlayerWidget::play);
     }
 }
@@ -172,10 +184,12 @@ void PlayerWidget::play() {
             ao_play(device, reinterpret_cast<char*>(data), bytes);
         } else {
             Sleeper::msleep(10);
+            precaching = true;
         }
     }
     ao_close(device);
     device = NULL;
+    precaching = true;
 }
 
 void PlayerWidget::parse_playlist() {

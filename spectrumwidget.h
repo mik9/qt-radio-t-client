@@ -10,8 +10,9 @@
 #include <QElapsedTimer>
 #include <QTimer>
 
-#define FRAMES_NUM 10
-#define SHIFT_PIXELS 1
+#define FPS_NORMAL 100
+#define FPS_SLOW 10
+#define SHIFT_PIXELS_PER_SECOND 100
 #define WIDTH 1.0
 
 class SpectrumWidget : public QWidget
@@ -27,10 +28,12 @@ public:
     void setTPF(double _s) { _time_per_frame = _s; }
     
     void new_data(float *_data, size_t len);
+    void main_window_focus_changed(bool focused);
 
 protected:
     void paintEvent(QPaintEvent *);
     void resizeEvent(QResizeEvent *);
+    void mousePressEvent(QMouseEvent *);
 
 private:
     QImage *currentImage;
@@ -41,7 +44,6 @@ private:
     QFuture<void> painterResult;
     QPoint lastPoint;
     QWaitCondition waiter;
-    QTimer new_color_timer;
     QTimer change_color_timer;
 
     float *data;
@@ -54,7 +56,7 @@ private:
     int new_bottom;
     volatile int top_color;
     volatile int new_top;
-
+    int __fps;
 
     void paintFunction();
     void __new_data(float *_data, size_t len);

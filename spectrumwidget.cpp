@@ -1,5 +1,6 @@
 #include "spectrumwidget.h"
 #include "sleeper.h"
+#include <qmath.h>
 
 SpectrumWidget::SpectrumWidget(QWidget *parent) :
     QWidget(parent)
@@ -16,10 +17,17 @@ SpectrumWidget::SpectrumWidget(QWidget *parent) :
     new_top = top_color = rand() % 255;
     data = NULL;
     connect(&change_color_timer, SIGNAL(timeout()), this, SLOT(change_color()));
-    connect(&new_color_timer, SIGNAL(timeout()), SLOT(new_color()));
     change_color_timer.start(200);
-    new_color_timer.start(20 * 1000);
     new_color();
+    __fps = FPS_NORMAL;
+}
+
+void SpectrumWidget::main_window_focus_changed(bool focused) {
+    if (focused) {
+        __fps = FPS_NORMAL;
+    } else {
+        __fps = FPS_SLOW;
+    }
 }
 
 void SpectrumWidget::new_color() {
@@ -41,6 +49,9 @@ void SpectrumWidget::change_color() {
         } else {
             bottom_color++;
         }
+    }
+    if (new_bottom == bottom_color && top_color == new_top) {
+        new_color();
     }
 }
 
@@ -85,16 +96,20 @@ void SpectrumWidget::paintFunction() {
 #ifndef QT_NO_DEBUG
         qDebug() << "locked";
 #endif
-        double sleep_time = ((double)dataLen / _samples_per_frame / _sample_size * _time_per_frame - t.elapsed() ) /FRAMES_NUM;
+        const double data_time = (double)dataLen / _samples_per_frame / _sample_size * _time_per_frame;
+        const int frame_num = qCeil(data_time * __fps);
+        const double sleep_time = (data_time - t.elapsed() ) / frame_num;
+        const int shift_pixels = SHIFT_PIXELS_PER_SECOND / __fps;
+
         const int height = bufferImage->height();
-        for(int i=1;i<=FRAMES_NUM;i++) {
+        for(int i=1;i<=frame_num;i++) {
             t.start();
 
             float s = 0;
 #ifndef QT_NO_DEBUG
-            qDebug() << "1:" << dataLen / FRAMES_NUM * (i-1) << dataLen * i / FRAMES_NUM;
+            qDebug() << "1:" << dataLen / frame_num * (i-1) << dataLen * i / frame_num;
 #endif
-            for(size_t j=dataLen / FRAMES_NUM * (i-1); j < dataLen * i / FRAMES_NUM; j++) {
+            for(size_t j=dataLen / frame_num * (i-1); j < dataLen * i / frame_num; j++) {
                 if (data[j] > 1) {
                     data[j] = 1;
                 } else if (data[j] < -1) {
@@ -102,12 +117,12 @@ void SpectrumWidget::paintFunction() {
                 }
                 s+=qAbs(data[j]);
             }
-            s /= dataLen / 2 / FRAMES_NUM;
+            s /= dataLen / 2 / frame_num;
             if (s>1) {
                 s=1;
             }
 
-            int y = lastPoint.y() + (height - height * s - lastPoint.y()) / (float)FRAMES_NUM * i;
+            int y = lastPoint.y() + (height - height * s - lastPoint.y()) / (float)frame_num * i;
             mPoint = QPoint(width(), y);
 
             const uchar *oldData = currentImage->bits();
@@ -118,8 +133,8 @@ void SpectrumWidget::paintFunction() {
             qDebug() << "2:" << 0 << height;
 #endif
             for(int j=0;j<height; j++) {
-                memcpy(_d+j*bpl, oldData+j*bpl+bpp*SHIFT_PIXELS, bpl-bpp*SHIFT_PIXELS);
-                memset(_d+(j+1)*bpl-bpp*SHIFT_PIXELS, 0, bpp*SHIFT_PIXELS);
+                memcpy(_d+j*bpl, oldData+j*bpl+bpp*shift_pixels, bpl-bpp*shift_pixels);
+                memset(_d+(j+1)*bpl-bpp*shift_pixels, 0, bpp*shift_pixels);
             }
 
 #ifndef QT_NO_DEBUG
@@ -135,11 +150,14 @@ void SpectrumWidget::paintFunction() {
                 const uchar b = _bottom.blue() - (_bottom.blue() - _top.blue()) * (height - j) / (float)height;
                 h = bottom_color - (bottom_color - top_color) * (height - j) / (float)height;
 
-                bufferImage->setPixel(width()-1, j, qRgb(r,g,b));
+                QRgb pixel = qRgb(r,g,b);
+                for (int z=1;z<=shift_pixels;z++) {
+                    bufferImage->setPixel(width()-z, j, pixel);
+                }
             }
 
             if (lastPoint.x() != 0) {
-                lastPoint.setX(lastPoint.x()-SHIFT_PIXELS);
+                lastPoint.setX(lastPoint.x()-shift_pixels);
                 p.begin(bufferImage);
                 p.setPen(QPen(QBrush(Qt::black), 1));
                 p.setRenderHint(QPainter::Antialiasing, true);
@@ -153,7 +171,7 @@ void SpectrumWidget::paintFunction() {
 #ifndef QT_NO_DEBUG
             qDebug() << "sleeping for" << sleep_time * 1000 << "-" << t.elapsed();
 #endif
-            Sleeper::msleep(sleep_time * 1000 - t.elapsed() + 1);
+            Sleeper::msleep(sleep_time * 1000 - t.elapsed());
         }
         dataLen = 0;
         dataMutex.unlock();
@@ -178,4 +196,16 @@ void SpectrumWidget::resizeEvent(QResizeEvent *e) {
     QMutexLocker locker(&dataMutex);
     currentImage = new QImage(currentImage->scaled(e->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     bufferImage = new QImage(bufferImage->scaled(e->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+}
+
+void SpectrumWidget::mousePressEvent(QMouseEvent *) {
+    painting = !painting;
+    if (painting) {
+        painterResult = QtConcurrent::run(this, &SpectrumWidget::paintFunction);
+    } else {
+        painterResult.waitForFinished();
+        bufferImage->fill(Qt::transparent);
+        currentImage->fill(Qt::transparent);
+        update();
+    }
 }
