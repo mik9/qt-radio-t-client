@@ -59,6 +59,8 @@ SpectrumWidget::~SpectrumWidget()
 {
     painting = false;
     painterResult.waitForFinished();
+    delete currentImage;
+    delete bufferImage;
 }
 
 void SpectrumWidget::new_data(float *_data, size_t len) {
@@ -192,8 +194,11 @@ void SpectrumWidget::swapBuffers() {
 
 void SpectrumWidget::resizeEvent(QResizeEvent *e) {
     QMutexLocker locker(&dataMutex);
+    QImage *old1 = currentImage, *old2 = bufferImage;
     currentImage = new QImage(currentImage->scaled(e->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     bufferImage = new QImage(bufferImage->scaled(e->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    delete old1;
+    delete old2;
 }
 
 void SpectrumWidget::mousePressEvent(QMouseEvent *) {
