@@ -181,13 +181,15 @@ void SpectrumWidget::paintFunction() {
     }
 }
 
-void SpectrumWidget::paintEvent(QPaintEvent *) {
+void SpectrumWidget::paintEvent(QPaintEvent *e) {
+    QMutexLocker locker(&waitMutex);
     QPainter p(this);
 
     p.drawPixmap(this->rect(), QPixmap::fromImage(*currentImage, Qt::ColorOnly));
 }
 
 void SpectrumWidget::swapBuffers() {
+    QMutexLocker locker(&waitMutex);
     qSwap(currentImage, bufferImage);
     update();
 }
