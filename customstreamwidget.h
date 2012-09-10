@@ -7,7 +7,7 @@
 #include <QMouseEvent>
 #include <QPropertyAnimation>
 
-#define ARC_RADIUS 5
+#define ARC_RADIUS 8
 
 class CustomStreamWidget : public QLabel
 {

@@ -17,7 +17,7 @@ SpectrumWidget::SpectrumWidget(QWidget *parent) :
     new_top = top_color = rand() % 255;
     data = NULL;
     connect(&change_color_timer, SIGNAL(timeout()), this, SLOT(change_color()));
-    change_color_timer.start(200);
+    change_color_timer.start(100);
     new_color();
     __fps = FPS_NORMAL;
 }
