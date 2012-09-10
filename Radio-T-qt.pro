@@ -21,7 +21,8 @@ SOURCES += main.cpp\
 #    spectrumanalyser.cpp \
 #    frequencyspectrum.cpp \
 #    utils.cpp \
-    spectrumwidget.cpp
+    spectrumwidget.cpp \
+    customstreamwidget.cpp
 
 HEADERS  += chatwidget.h \
     simplecrypt.h \
@@ -34,6 +35,7 @@ HEADERS  += chatwidget.h \
 #    spectrum.h \
     sleeper.h \
     spectrumwidget.h \
+    customstreamwidget.h
 
 FORMS    += chatwidget.ui \
     playerwidget.ui

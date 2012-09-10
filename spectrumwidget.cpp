@@ -77,7 +77,7 @@ void SpectrumWidget::paintFunction() {
     qDebug() << "Thread started.";
 #endif
     QPainter p;
-    QPoint lastPoint(0,0);
+    QPoint lastPoint(width() - 1,height() - 1);
     QPoint mPoint;
     Sleeper::msleep(5);
 
@@ -156,14 +156,12 @@ void SpectrumWidget::paintFunction() {
                 }
             }
 
-            if (lastPoint.x() != 0) {
-                lastPoint.setX(lastPoint.x()-shift_pixels);
-                p.begin(bufferImage);
-                p.setPen(QPen(QBrush(Qt::black), 1));
-                p.setRenderHint(QPainter::Antialiasing, true);
-                p.drawLine(lastPoint, mPoint);
-                p.end();
-            }
+            lastPoint.setX(lastPoint.x()-shift_pixels);
+            p.begin(bufferImage);
+            p.setPen(QPen(QBrush(Qt::black), 1));
+            p.setRenderHint(QPainter::Antialiasing, true);
+            p.drawLine(lastPoint, mPoint);
+            p.end();
 
             lastPoint = mPoint;
 

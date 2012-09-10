@@ -60,6 +60,7 @@ TwitterWidget::TwitterWidget(QWidget *parent) :
 
     this->slidingWidget->layout()->setContentsMargins(30,15,15,15);
     this->setMinimumSize(l1->minimumSize());
+    this->setMinimumWidth(400);
 
     hashtag = "#radiot";
 

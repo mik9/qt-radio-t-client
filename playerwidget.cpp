@@ -67,6 +67,18 @@ PlayerWidget::PlayerWidget(QWidget *parent) :
     volume_label_hide_timer.setSingleShot(true);
     connect(&volume_label_hide_timer, SIGNAL(timeout()), &volume_label, SLOT(hide()));
     volume_label_hide_timer.setInterval(HIDE_TIMER_INTERVAL);
+
+    QList<QPair<QString, QString> > __streams;
+    __streams << QPair<QString, QString>("Radio-T", "http://stream.radio-t.com:8181/stream.m3u");
+    __streams << QPair<QString, QString>("Radio-Roks", "http://www.radioroks.com.ua/RadioROKS.m3u");
+
+    for(int i=0; i< __streams.length(); i++) {
+        QPair<QString, QString> stream = __streams.at(i);
+        CustomStreamWidget *w = new CustomStreamWidget(stream.second, stream.first);
+        connect(w, SIGNAL(change_sream(QString)), this, SLOT(stream_changed(QString)));
+        ui->streamsHolder->addWidget(w);
+        streams << w;
+    }
 }
 
 PlayerWidget::~PlayerWidget()
@@ -89,12 +101,22 @@ void PlayerWidget::stateChanged() {
     }
 }
 
-void PlayerWidget::setMediaSource(QString new_media_source) {
+void PlayerWidget::addMediaSource(QString new_media_source) {
     media_source = new_media_source;
+    for(int i=0;i<streams.length();i++) {
+        if (streams.at(i)->equals(media_source)) {
+            return;
+        }
+    }
+    CustomStreamWidget *w = new CustomStreamWidget(media_source, "User stream");
+    connect(w, SIGNAL(change_sream(QString)), this, SLOT(stream_changed(QString)));
+    ui->streamsHolder->addWidget(w);
+    streams << w;
 }
 
 void PlayerWidget::streaming_finished() {
     playing = false;
+    starting = false;
     stateChanged();
     QNetworkReply *r = (QNetworkReply*)sender();
     r->deleteLater();
@@ -126,7 +148,11 @@ void PlayerWidget::decoder() {
         mpg123_getformat(mh, &rate, &ch, &enc);
         int sampleSize = mpg123_encsize(enc);
         ui->spectrum->setSampleSize(sampleSize);
-        mpg123_volume(mh, ui->volumeSlider->value()/100.0);
+        if (ui->muteButton->isChecked()) {
+            mpg123_volume(mh, 0);
+        } else {
+            mpg123_volume(mh, ui->volumeSlider->value()/100.0);
+        }
         ao_sample_format format;
         memset(&format, 0, sizeof(format));
         format.channels = ch;
@@ -230,11 +256,23 @@ void PlayerWidget::on_playPause_clicked() {
         mpg123_open_feed(mh);
         parse_playlist();
         stateChanged();
+        for (int i=0;i<streams.length();i++) {
+            CustomStreamWidget *w = streams.at(i);
+            if (w->equals(media_source)) {
+                w->setNotActive();
+            }
+        }
     } else {
         playing = false;
         mpg123_close(mh);
         ui->playPause->setEnabled(false);
         QtConcurrent::run(this, &PlayerWidget::close_ao_device);
+        for (int i=0;i<streams.length();i++) {
+            CustomStreamWidget *w = streams.at(i);
+            if (w->equals(media_source)) {
+                w->setNotActive();
+            }
+        }
     }
 }
 void PlayerWidget::close_ao_device() {
@@ -257,7 +295,7 @@ void PlayerWidget::on_volumeSlider_valueChanged(int value)
     if (!VolumeToolTipHider::mouse_pressed) {
         volume_label_hide_timer.start();
     }
-    if (mh) {
+    if (mh && !ui->muteButton->isChecked()) {
         mpg123_volume(mh, value/100.0);
     }
 }
@@ -271,4 +309,27 @@ void PlayerWidget::on_muteButton_toggled(bool checked) {
         mpg123_volume(mh, last_volume);
         ui->muteButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_MediaVolume));
     }
+}
+
+void PlayerWidget::stream_changed(QString new_stream) {
+    if (starting) {
+        return;
+    }
+    if (playing) {
+        if (media_source == new_stream) {
+            return;
+        }
+        playing = false;
+        mpg123_close(mh);
+        ui->playPause->setEnabled(false);
+        close_ao_device();
+        for (int i=0;i<streams.length();i++) {
+            CustomStreamWidget *w = streams.at(i);
+            if (w->equals(media_source)) {
+                w->setNotActive();
+            }
+        }
+    }
+    media_source = new_stream;
+    on_playPause_clicked();
 }

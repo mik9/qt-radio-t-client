@@ -13,6 +13,7 @@
 #include <QSettings>
 #include <QLabel>
 #include <QMouseEvent>
+#include "customstreamwidget.h"
 
 #define OUTPUT_BUFFER_SIZE 16*1024
 #define PRECACHE_SIZE 64*1024
@@ -30,7 +31,7 @@ class PlayerWidget : public QWidget
 public:
     explicit PlayerWidget(QWidget *parent = 0);
     ~PlayerWidget();
-    void setMediaSource(QString new_media_source);
+    void addMediaSource(QString new_media_source);
     QLabel volume_label;
     
 public slots:
@@ -41,6 +42,7 @@ private slots:
     void stateChanged();
     void playlist_downloaded();
     void streaming_finished();
+    void stream_changed(QString new_stream);
 
     void on_volumeSlider_valueChanged(int value);
     void on_muteButton_toggled(bool checked);
@@ -57,6 +59,7 @@ private:
     QNetworkAccessManager m;
     QTimer volume_label_hide_timer;
     double last_volume;
+    QList<CustomStreamWidget*> streams;
 
     void parse_playlist();
     void play();

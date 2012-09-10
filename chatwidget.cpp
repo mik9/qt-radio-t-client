@@ -92,13 +92,13 @@ ChatWidget::ChatWidget(QWidget *parent) :
         } else if (arg.split("=").length() != 2) {
             continue;
         } else if (arg.startsWith("-conference")) {
-            jabber_room = arg.split("=")[1];
+            jabber_room = arg.split("=").at(1);
         } else if (arg.startsWith("-twitter")) {
-            QString hashtag = arg.split("=")[1];
+            QString hashtag = arg.split("=").at(1);
             ui->twitter_widget->setHashtag(hashtag);
         } else if (arg.startsWith("-custom-mirror")) {
-            QString mirror = arg.split("=")[1];
-            ui->player_widget->setMediaSource(mirror);
+            QString mirror = arg.split("=").at(1);
+            ui->player_widget->addMediaSource(mirror);
         }
     }
 }
@@ -179,28 +179,8 @@ void ChatWidget::message_received(QXmppMessage m) {
 
 void ChatWidget::on_chat_edit_anchorClicked(QUrl uri) {
     if (uri.scheme() == "user") {
-        QString username = uri.host();
-        QString real_username;
-        if(!uri.userName().isEmpty()) {
-            username = uri.userName() + "@" + username;
-            real_username = username;
-        }
-        QStringList l = manager.rooms().at(0)->participants().filter(username, Qt::CaseInsensitive);
-        if (real_username.isEmpty()) {
-            if (l.isEmpty()) {
-                real_username = username;
-            } else {
-                real_username = l.first();
-            }
-        }
-        if (l.length() > 1) {
-            foreach (QString s, l) {
-                if (s.length() == username.length()) {
-                    real_username = s;
-                }
-            }
-        }
-        this->put_username(strip_username(real_username));
+        QString username = uri.toString().split("/").at(2);
+        this->put_username(strip_username(username));
     } else {
         QDesktopServices::openUrl(uri);
     }

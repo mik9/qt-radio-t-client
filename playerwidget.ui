@@ -64,7 +64,21 @@
     </layout>
    </item>
    <item>
-    <widget class="SpectrumWidget" name="spectrum" native="true"/>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="SpectrumWidget" name="spectrum" native="true"/>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="streamsHolder">
+       <property name="spacing">
+        <number>1</number>
+       </property>
+      </layout>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
