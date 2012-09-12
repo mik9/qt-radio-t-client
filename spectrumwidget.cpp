@@ -64,7 +64,14 @@ SpectrumWidget::~SpectrumWidget()
 }
 
 void SpectrumWidget::new_data(float *_data, size_t len) {
+#ifndef QT_NO_DEBUG
+    QElapsedTimer t;t.start();
+#endif
     QMutexLocker locker(&dataMutex);
+#ifndef QT_NO_DEBUG
+    if(int a=t.elapsed()) qDebug() << a;
+#endif
+
     if(data) {
         delete [] data;
     } else {
@@ -88,7 +95,7 @@ void SpectrumWidget::paintFunction() {
 
     while (painting) {
         if (!dataLen) {
-            Sleeper::msleep(1);
+            Sleeper::usleep(10);
             continue;
         }
 
@@ -98,15 +105,12 @@ void SpectrumWidget::paintFunction() {
 #ifndef QT_NO_DEBUG
         qDebug() << "locked";
 #endif
-        const double data_time = (double)dataLen / _samples_per_frame / _sample_size * _time_per_frame;
+        const double data_time = (double)dataLen / _samples_per_frame / _sample_size * _time_per_frame-0.002;
         const int frame_num = qCeil(data_time * __fps);
-        const double sleep_time = (data_time - t.elapsed() ) / frame_num;
         const int shift_pixels = SHIFT_PIXELS_PER_SECOND / __fps;
 
         const int height = bufferImage->height();
         for(int i=1;i<=frame_num;i++) {
-            t.start();
-
             float s = 0;
 #ifndef QT_NO_DEBUG
             qDebug() << "1:" << dataLen / frame_num * (i-1) << dataLen * i / frame_num;
@@ -168,10 +172,11 @@ void SpectrumWidget::paintFunction() {
             lastPoint = mPoint;
 
             swapBuffers();
+            const double sleep_time = (data_time - t.nsecsElapsed()/1000000000.0) / (frame_num - i + 1);
 #ifndef QT_NO_DEBUG
-            qDebug() << "sleeping for" << sleep_time * 1000 << "-" << t.elapsed();
+            qDebug() << "sleeping for" << sleep_time * 1000000;
 #endif
-            Sleeper::msleep(sleep_time * 1000 - t.elapsed());
+            Sleeper::usleep(sleep_time * 1000000);
         }
         dataLen = 0;
         dataMutex.unlock();
